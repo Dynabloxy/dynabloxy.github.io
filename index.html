@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" href="images/logo.png">
+    <title>Dynablox</title>
+    <style>
+        body { font-family: Verdana, Arial, sans-serif; font-size: 11px; color: #000; background-color: #fff; margin-top: 0; }
+        .Header { border-right: black 1px solid; border-left: black 1px solid; padding: 15px 5px; position: relative; overflow: hidden; background: radial-gradient(circle at center top, #87ceeb 0%, #0055bf 40%, #001a33 100%); }
+        .Header::before { content:""; position:absolute; left:50%; top:-150%; width:300%; height:400%; margin-left:-150%; pointer-events:none; z-index:0;
+            background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(135,206,250,.38) 0deg 4deg, rgba(135,206,250,0) 4deg 14deg);
+            -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0%, transparent 45%); mask-image: radial-gradient(circle at 50% 50%, #000 0%, transparent 45%);
+            }
+        .Header table { position: relative; z-index: 1; }
+        .BannerText { font-size: 14px; font-weight: bold; color: #fff; text-decoration: none; text-shadow: 1px 1px 2px #000; }
+        .MenuItem { font-size: 12px; font-weight: bold; color: #000; text-decoration: none; margin: 0 5px; }
+        .box{border:1px solid steelblue;background:#f9f9f9;padding:10px;margin:8px 0;text-align:left}
+        .msg{color:red;font-size:10px;min-height:12px}.ok{color:green}
+        .Btn{font-size:11px;padding:2px 8px;cursor:pointer}
+        .char{display:inline-block;text-align:center}.char div{margin:0 auto}
+        .place-thumb{display:flex;align-items:center;justify-content:center;font-size:24px}
+        .Title { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        .LogInButton, .SignUpButton { font-size: 11px; padding: 2px 5px; cursor: pointer; }
+        .GoogleButton { font-size: 11px; padding: 4px 8px; cursor: pointer; width: 100%; background: #fff; border: 1px solid #999; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .GoogleButton:hover { background: #f0f0f0; }
+        .Legal { font-size: 10px; color: #666; }
+        .GridLink { font-size: 11px; color: #0000EE; text-decoration: none; }
+        .GridLink:hover { text-decoration: underline; }
+        .avatar-img { border: 1px solid #ccc; width: 48px; height: 48px; }
+        .status-msg { color: red; font-size: 10px; min-height: 12px; display:block; }
+        .success-msg { color: green; font-size: 10px; display:block; }
+        .place-card { display: inline-block; width: 140px; margin: 5px; padding: 8px; border: 1px solid #999; background: #f9f9f9; text-align: center; vertical-align: top; cursor: pointer; }
+        .place-card:hover { background: #e7f3ff; border-color: #0055bf; }
+        .place-thumb { position: relative; overflow: hidden; width: 120px; height: 80px; background: linear-gradient(135deg, #87ceeb, #0055bf); border: 1px solid #666; margin: 0 auto 5px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; }
+        .place-name { font-weight: bold; font-size: 11px; margin: 3px 0; }
+        .place-stats { font-size: 9px; color: #666; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+</head>
+<body style="margin-top: 0;">
+
+<div id="conn-banner" style="display:none; padding:6px; margin:0 auto 6px; width:800px; box-sizing:border-box; font-size:11px; border:1px solid #c00; background:#ffecec; color:#900; text-align:left;"></div>
+<div align="center">
+    <table width="800" cellspacing="0" cellpadding="0">
+        <tr>
+            <td class="Header" align="center">
+                <table width="100%"><tr>
+                    <td width="250" valign="bottom" align="left"><a href="#/" class="BannerText">DYNABLOX.com (Beta)</a></td>
+                    <td width="300" align="center">
+                        <img src="images/logo.png" alt="Logo" height="50" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                        <span class="BannerText" style="font-size:24px; display:none;">DYNABLOX</span>
+                    </td>
+                    <td width="250" align="right"><span id="auth-area" class="BannerText">Guest</span></td>
+                </tr></table>
+            </td>
+        </tr>
+        <tr>
+            <td style="border: black 1px solid; background-color: lightsteelblue; padding: 5px;" align="center">
+                <a href="#/" class="MenuItem">Home</a>|
+                <a href="#/browse" class="MenuItem">Browse</a>|
+                <a href="#/shop" class="MenuItem">Shop</a>|
+                <a href="#/customize" class="MenuItem">Customize</a>|
+                <a href="#/forum" class="MenuItem">Forum</a>|
+                <a href="#/download" class="MenuItem">Download</a>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-top: 16px">
+<div id="view-home">
+                <div style="text-align: center">
+                    <table style="margin-top: 5px" width="100%" cellspacing="10">
+                        <tr>
+                            <td width="60%">
+                                <p class="Title">Welcome to Dynablox!</p>
+                                <p>To get started, simply choose a character and visit somebody's Place. When you visit your own place, changes that you make are permanent.</p>
+                                <p>Please enter feedback and bugs in the forums. Thank you from the Dynablox team.</p>
+
+                                <div id="profile-box" style="display:none; margin-top:10px; padding:10px; border:1px dashed green; background:#eaffea; text-align:left;">
+                                    <strong>User:</strong> <span id="p-name">-</span><br>
+                                    <strong>Bux:</strong> <span id="p-bux" style="color:green;font-weight:bold;">0</span><br><br>
+                                    <button onclick="location.href='#/customize'" class="LogInButton">Customize</button>
+                                    <button onclick="location.href='#/shop'" class="LogInButton">Shop</button>
+                                    <button onclick="location.href='#/place?id=default'" class="LogInButton">▶ Play Game</button>
+                                    <button onclick="claimDaily()" class="LogInButton" id="dailyBtn">🎁 Daily Reward</button>
+                                    <button onclick="logout()" class="SignUpButton">Logout</button>
+                                    <br><br>
+                                    <div id="dailyMsg" class="status-msg"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div id="loginContainer" style="border: steelblue 1px solid; padding: 10px; background:#f9f9f9;">
+                                    <form onsubmit="handleAuth(event)">
+                                        <table>
+                                            <tr><td>Username:</td><td><input type="text" id="authUser" required style="width:100%;"></td></tr>
+                                            <tr id="emailRow" style="display:none;"><td>Email:</td><td><input type="email" id="authEmail" style="width:100%;"></td></tr>
+                                            <tr><td>Password:</td><td><input type="password" id="authPass" required style="width:100%;" minlength="6"></td></tr>
+                                            <tr>
+                                                <td colspan="2" align="center" style="padding-top:5px;">
+                                                    <button type="button" onclick="setMode('login')" id="btnLogin" class="LogInButton">Log In</button>
+                                                    <button type="button" onclick="setMode('register')" id="btnRegister" class="SignUpButton">Sign Up</button>
+                                                    <br><br>
+                                                    <input type="submit" value="Submit" class="LogInButton" style="width:100%;">
+                                                </td>
+                                            </tr>
+                                            <tr><td colspan="2" align="center"><div id="authMsg" class="status-msg"></div></td></tr>
+                                            <tr>
+                                                <td colspan="2" align="center" style="padding-top:8px;">
+                                                    <hr style="margin:8px 0;">
+                                                    <button type="button" onclick="signInWithGoogle()" class="GoogleButton">
+                                                        <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                                                        Sign in with Google
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- FEATURED PLACES -->
+                        <tr>
+                            <td colspan="2">
+                                <table width="100%" bgcolor="LightSteelBlue" cellpadding="5" border="0">
+                                    <tr><td colspan="5" class="Title">🎮 Featured Places</td></tr>
+                                    <tr>
+                                        <td colspan="5" align="center">
+                                            <div id="places-list">
+                                                <p><i>Loading places...</i></p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr><td colspan="5" align="right"><a href="#/browse" class="GridLink">Browse All Places »</a></td></tr>
+                                </table>
+                            </td>
+                        </tr>
+
+                        <!-- NEWEST PEOPLE -->
+                        <tr>
+                            <td colspan="2">
+                                <table width="100%" bgcolor="LightSteelBlue" cellpadding="5" border="0">
+                                    <tr><td colspan="3" class="Title">👥 Newest People</td></tr>
+                                    <tr><td colspan="3" align="center"><div id="newestUsersRow"><i>Loading...</i></div></td></tr>
+                                    <tr><td colspan="3" align="right"><a href="#/browse" class="GridLink">Browse All People »</a></td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+</div>
+<div id="view-other" style="display:none; text-align:left; padding:0 10px"></div>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 10px;"><hr>
+                <div class="Legal" style="TEXT-ALIGN: center">
+                    Dynablox © 2006-2026. All rights reserved.<br>
+                    <a href="#/privacy" class="Legal">Privacy Policy</a> | <a href="#/terms" class="Legal">Terms</a> | <a href="#/download" class="Legal">Download</a>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyBxQZ7MW7v2ki58wKHJiCoXoM1nFHONA1U",
+    authDomain: "dynablox-ee611.firebaseapp.com",
+    databaseURL: "https://dynablox-ee611-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "dynablox-ee611",
+    storageBucket: "dynablox-ee611.firebasestorage.app",
+    messagingSenderId: "37069889465",
+    appId: "1:37069889465:web:c8ea1b0289bbb15a54e068"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
+
+function showBanner(text) {
+    const b = document.getElementById('conn-banner');
+    b.innerHTML = text;
+    b.style.display = 'block';
+}
+
+if (location.protocol === 'file:') {
+    showBanner('⚠ Страница открыта как file://. Firebase Auth и загрузка папок games/ и images/ так не работают. Запусти через сервер: <code>python -m http.server 8000</code> и открой http://localhost:8000');
+}
+
+// Проверка соединения с Realtime Database
+db.ref('.info/connected').on('value', snap => {
+    const b = document.getElementById('conn-banner');
+    if (snap.val() === true) {
+        if (location.protocol !== 'file:') b.style.display = 'none';
+    } else {
+        setTimeout(() => {
+            if (!firebaseConnected()) showBanner('⚠ Нет соединения с Firebase Database (' + firebaseConfig.databaseURL + '). Проверь: URL базы в Firebase Console → Realtime Database, отключи AdBlock/VPN, домен в Authentication → Settings → Authorized domains.');
+        }, 5000);
+    }
+    window.__fbConnected = snap.val() === true;
+});
+function firebaseConnected() { return window.__fbConnected === true; }
+
+// Если лаунчер регистрирует свой протокол (например dynablox://), впиши его сюда: 'dynablox'
+// Тогда клик по месту откроет dynablox://play?file=games/20.rbxl&id=...
+const LAUNCHER_PROTOCOL = 'dynablox'; // протокол твоего Python-лаунчера; null = отключить
+
+function openPlace(id, file) {
+    location.hash = '#/place?id=' + encodeURIComponent(id) + (file ? '&file=' + encodeURIComponent(file) : '');
+}
+
+const esc = s => escapeHtml(s);
+const $ = id => document.getElementById(id);
+const param = k => new URLSearchParams((location.hash.split('?')[1]) || '').get(k);
+
+// action: startserver | startplayer | playsolo  (твои Lua: StartServer / StartPlayer / PlaySolo)
+function launch(action, file, id) {
+    if (!LAUNCHER_PROTOCOL) { alert('Лаунчер не настроен (LAUNCHER_PROTOCOL)'); return; }
+    location.href = LAUNCHER_PROTOCOL + '://' + action + '?id=' + encodeURIComponent(id || '') +
+        '&file=' + encodeURIComponent(file || '') + '&user=' + encodeURIComponent(currentUser ? currentUser.username : 'Guest');
+}
+
+function charHtml(c) { c = c || {};
+    return '<div class="char"><div style="width:26px;height:26px;background:' + esc(c.head||'#f5d7a1') + '"></div><div style="white-space:nowrap">' +
+    '<span style="display:inline-block;width:12px;height:40px;background:' + esc(c.arms||'#f58a1f') + '"></span>' +
+    '<span style="display:inline-block;width:40px;height:40px;background:' + esc(c.torso||'#0055bf') + '"></span>' +
+    '<span style="display:inline-block;width:12px;height:40px;background:' + esc(c.arms||'#f58a1f') + '"></span></div>' +
+    '<div style="width:40px;height:40px;background:' + esc(c.legs||'#287f47') + '"></div></div>'; }
+
+const PAGES = {
+download:{title:"Download Dynablox",html:"<div class=\"box\"><div class=\"Title\">Dynablox для Windows</div>\n<table cellspacing=\"6\"><tr><td><a class=\"GridLink\" href=\"dynablox.zip\" download><b>⬇ dynablox.zip</b></a></td><td>клиент (RobloxApp.exe), DLL, текстуры, скрипты и игры <span id=\"dl-zip\" class=\"Legal\"></span></td></tr>\n<tr><td><a class=\"GridLink\" href=\"launcher.py\" download><b>⬇ launcher.py</b></a></td><td>лаунчер (нужен Python 3) <span id=\"dl-py\" class=\"Legal\"></span></td></tr></table></div>\n<div class=\"box\"><b>Установка</b><br>1. Распакуйте <code>dynablox.zip</code> в любую папку.<br>2. Положите <code>launcher.py</code> в эту же папку.<br>3. Один раз выполните: <code>python launcher.py --install</code><br>4. Нажмите Play, Start Server, Play Solo или Build на странице игры, браузер предложит открыть Dynablox Launcher.\n<pre style=\"font-size:11px;background:#fff;border:1px solid #ccc;padding:6px\">dynablox/\\n  client/    RobloxApp.exe, DLL, текстуры\\n  scripts/   StartServer.lua, StartPlayer.lua, PlaySolo.lua\\n  games/     *.rbxl\\n  launcher.py</pre></div>\n<p class=\"Legal\">Требования: Windows и Python 3.</p>",run:async function(user){
+  for (const [id, f] of [['dl-zip','dynablox.zip'],['dl-py','launcher.py']]) {
+    try {
+      const r = await fetch(f, { method: 'HEAD' });
+      const n = Number(r.headers.get('content-length'));
+      $(id).textContent = r.ok ? (n ? '(' + (n/1048576).toFixed(1) + ' МБ)' : '') : '(файл ещё не загружен)';
+    } catch (e) { $(id).textContent = ''; }
+  }
+}},
+browse:{title:"Browse",html:"<div id=\"list\"><i>Loading...</i></div>",run:async function(user){
+const places=[];(await db.ref('places').once('value')).forEach(c=>places.push({id:c.key,...c.val()}));
+const people=[];(await db.ref('public_users').once('value')).forEach(c=>people.push({id:c.key,...c.val()}));
+let h='<div class="Title">🎮 Places</div>'+(places.length?places.map(p=>`<div class="place-card" onclick="location.href='#/place?id=${encodeURIComponent(p.id)}'"><div class="place-thumb">${esc(p.icon||'🎮')}</div><div class="place-name"><b>${esc(p.name)}</b></div></div>`).join(''):'<p>Нет мест (добавь их в Firebase: places, или открой главную).</p>');
+h+='<div class="Title" style="margin-top:12px">👥 People</div>'+people.map(u=>`<a class="GridLink" style="margin-right:12px" href="#/profile?id=${encodeURIComponent(u.id)}">${esc(u.username)}</a>`).join('');
+$('list').innerHTML=h;
+}},
+shop:{title:"Shop",html:"<div id=\"list\"><i>Loading...</i></div><div id=\"m\" class=\"msg\"></div>",run:async function(user){
+const DEFAULT=[{id:'face-smile',name:'Smile Face',price:10,icon:'🙂'},{id:'tshirt-blue',name:'Blue T-Shirt',price:25,icon:'👕'},{id:'pants-black',name:'Black Pants',price:25,icon:'👖'}];
+let items=[];try{(await db.ref('shop').once('value')).forEach(c=>items.push({id:c.key,...c.val()}))}catch(e){}
+if(!items.length)items=DEFAULT;
+window.buy=async function(id){
+  if(!user){$('m').textContent='Войди в аккаунт';return}
+  const it=items.find(i=>i.id===id);
+  const res=await db.ref('users/'+user.uid).transaction(u=>{
+    if(!u)return u; if(u.inventory&&u.inventory[id])return; if((u.bux||0)<it.price)return;
+    u.bux-=it.price;u.inventory=u.inventory||{};u.inventory[id]=true;return u});
+  $('m').className=res.committed?'ok':'msg';$('m').textContent=res.committed?'Куплено!':'Нельзя купить (уже есть или не хватает Bux)';
+  if(res.committed)setTimeout(()=>location.reload(),700)};
+$('list').innerHTML=items.map(i=>{const own=user&&user.inventory&&user.inventory[i.id];
+ return `<div class="place-card" style="cursor:default"><div class="place-thumb">${esc(i.icon||'🛍')}</div><b>${esc(i.name)}</b><br>${i.price} Bux<br><button class="Btn" ${own?'disabled':''} onclick="buy('${esc(i.id)}')">${own?'Owned':'Buy'}</button></div>`}).join('');
+}},
+customize:{title:"Customize",html:"<div class=\"box\" id=\"box\"></div>",run:async function(user){
+if(!user){$('box').innerHTML='Войди в аккаунт на <a href="#/">главной</a>.';return}
+const c=Object.assign({torso:'#0055bf',head:'#f5d7a1',arms:'#f58a1f',legs:'#287f47'},user.colors||{});
+const parts=['head','torso','arms','legs'];
+function draw(){$('box').innerHTML='<table><tr><td>'+charHtml(c)+'</td><td style="padding-left:20px">'+
+ parts.map(p=>`${p}: <input type="color" value="${c[p]}" onchange="setC('${p}',this.value)"><br>`).join('')+
+ '<br><button class="Btn" onclick="save()">Save</button> <span id="m" class="msg"></span></td></tr></table>'}
+window.setC=(p,v)=>{c[p]=v;draw()};
+window.save=async()=>{await db.ref('users/'+user.uid+'/colors').set(c);$('m').className='ok';$('m').textContent='Saved!'};
+draw();
+}},
+forum:{title:"Forum",html:"<div id=\"new\" class=\"box\"></div><div id=\"list\"></div>",run:async function(user){
+$('new').innerHTML=user?'<input id="t" placeholder="Title" style="width:60%" maxlength="80"><br><textarea id="b" rows="3" style="width:90%" maxlength="1000" placeholder="Message"></textarea><br><button class="Btn" onclick="post()">Post</button> <span id="m" class="msg"></span>':'Войди, чтобы писать.';
+window.post=async()=>{const t=$('t').value.trim(),b=$('b').value.trim();if(!t||!b){$('m').textContent='Заполни поля';return}
+ await db.ref('forum/posts').push({title:t,body:b,uid:user.uid,username:user.username,createdAt:firebase.database.ServerValue.TIMESTAMP});location.reload()};
+const posts=[];(await db.ref('forum/posts').orderByChild('createdAt').limitToLast(50).once('value')).forEach(c=>posts.push(c.val()));
+$('list').innerHTML=posts.reverse().map(p=>`<div class="box"><b>${esc(p.title)}</b> — <a class="GridLink" href="#/profile?id=${encodeURIComponent(p.uid)}">${esc(p.username)}</a> <span class="Legal">${new Date(p.createdAt).toLocaleString()}</span><br>${esc(p.body).replace(/\n/g,'<br>')}</div>`).join('')||'<p>Пока нет сообщений.</p>';
+}},
+place:{title:"Place",html:"<div class=\"box\" id=\"box\"><i>Loading...</i></div>",run:async function(user){
+const id=param('id')||'default';let file=param('file');let p=null;
+try{p=(await db.ref('places/'+id).once('value')).val()}catch(e){}
+if(!file&&p&&p.file)file=p.file;
+if(!file){try{const g=await (await fetch('games/games.json')).json();const f=g.find(x=>x.id===id);if(f){file=f.file;p=p||f}}catch(e){}}
+const name=(p&&p.name)||id;
+$('box').innerHTML=`<div class="Title">${esc(name)}</div><p>Файл: ${esc(file||'не найден')}</p>
+<button class="Btn" onclick="launch('startplayer','${esc(file||'')}','${esc(id)}')">▶ Play (join server)</button>
+<button class="Btn" onclick="launch('startserver','${esc(file||'')}','${esc(id)}')">🖥 Start Server</button>
+<button class="Btn" onclick="launch('playsolo','${esc(file||'')}','${esc(id)}')">🎮 Play Solo</button>
+<button class="Btn" onclick="launch('build','${esc(file||'')}','${esc(id)}')">🔨 Build</button>
+<p class="Legal">Нужен установленный лаунчер Dynablox (протокол ${esc(LAUNCHER_PROTOCOL)}://).</p>`;
+}},
+profile:{title:"Profile",html:"<div class=\"box\" id=\"box\"><i>Loading...</i></div>",run:async function(user){
+const id=param('id')||(user&&user.uid);if(!id){$('box').innerHTML='Профиль не найден';return}
+const pub=(await db.ref('public_users/'+id).once('value')).val();
+if(!pub){$('box').innerHTML='Пользователь не найден';return}
+let colors=null;if(user&&user.uid===id)colors=user.colors;
+$('box').innerHTML=`<table><tr><td>${charHtml(colors)}</td><td style="padding-left:20px"><div class="Title">${esc(pub.username)}</div>
+ Joined: ${pub.createdAt?new Date(pub.createdAt).toLocaleDateString():'-'}${colors?'<br>Bux: '+user.bux+'<br><br><button class="Btn" onclick="location.href=\'#/customize\'">Customize</button> <button class="Btn" onclick="auth.signOut().then(()=>location.href=\'#/\')">Logout</button>':''}</td></tr></table>`;
+}},
+privacy:{title:"Privacy Policy",html:"<p>Мы храним ваше имя пользователя, email и игровые данные в Firebase. Данные не передаются третьим лицам. Для удаления аккаунта напишите на форуме.</p>",run:async function(user){
+}},
+terms:{title:"Terms",html:"<p>Используя Dynablox, вы соглашаетесь не нарушать правила сообщества, не мошенничать и не вредить другим игрокам. Сайт предоставляется «как есть».</p>",run:async function(user){
+}}
+};
+
+let authReady = false;
+async function route() {
+    if (!authReady) return;
+    const name = (location.hash.replace(/^#\/?/, '').split('?')[0]) || 'home';
+    document.querySelectorAll('.MenuItem').forEach(a => {
+        a.style.textDecoration = (a.getAttribute('href') === '#/' + (name === 'home' ? '' : name)) ? 'underline' : 'none';
+    });
+    const home = $('view-home'), other = $('view-other');
+    if (name === 'home' || !PAGES[name]) { home.style.display = ''; other.style.display = 'none'; return; }
+    home.style.display = 'none'; other.style.display = 'block';
+    const p = PAGES[name];
+    other.innerHTML = '<p class="Title">' + p.title + '</p>' + p.html;
+    window.scrollTo(0, 0);
+    try { await p.run(currentUser); }
+    catch (e) { console.error(e); other.insertAdjacentHTML('afterbegin', '<p class="msg">Ошибка: ' + esc(e.message) + '</p>'); }
+}
+window.addEventListener('hashchange', route);
+
+let currentUser = null;
+let authMode = 'login';
+let pendingRegister = null;
+
+function escapeHtml(str) {
+    return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function isUsernameTaken(name) {
+    const allSnap = await db.ref('public_users').once('value');
+    let taken = false;
+    allSnap.forEach(child => {
+        const u = child.val();
+        if (u && u.username && u.username.toLowerCase() === name.toLowerCase()) taken = true;
+    });
+    return taken;
+}
+
+async function createProfile(user, username) {
+    const data = {
+        username: username,
+        email: user.email,
+        bux: 100,
+        equipment: { face: null, tshirt: null, pants: null },
+        colors: { torso: "#0055bf", head: "#f5d7a1", arms: "#f58a1f", legs: "#287f47" },
+        inventory: {}
+    };
+    await db.ref(`users/${user.uid}`).set(data);
+    await db.ref(`public_users/${user.uid}`).set({
+        username: username,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+    });
+    return data;
+}
+
+function isValidUsername(u) {
+    if (!u || u.length < 3 || u.length > 20) return false;
+    return /^[a-zA-Z0-9_]+$/.test(u);
+}
+
+auth.onAuthStateChanged(async user => {
+    console.log("[auth] state changed:", user ? user.uid : "guest");
+    try {
+        if (user) {
+            const snap = await db.ref(`users/${user.uid}`).once('value');
+            let data = snap.val();
+
+            if (!data && pendingRegister) {
+                data = await createProfile(user, pendingRegister.username);
+                pendingRegister = null;
+            } else if (!data) {
+                // Google или первый вход — username из имени/email
+                let baseName = (user.displayName || (user.email || '').split('@')[0] || '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20);
+                if (!baseName || baseName.length < 3) baseName = 'user' + user.uid.substr(0, 5);
+
+                let finalName = baseName;
+                if (await isUsernameTaken(baseName)) {
+                    finalName = baseName.slice(0, 15) + Math.floor(Math.random() * 9999);
+                }
+                data = await createProfile(user, finalName);
+            }
+            currentUser = { uid: user.uid, ...data };
+            updateUIForLoggedIn();
+        } else {
+            currentUser = null;
+            updateUIForGuest();
+        }
+    } catch (err) {
+        console.error("[auth state]", err);
+        document.getElementById('authMsg').innerText = "Ошибка загрузки профиля: " + err.message;
+    }
+    loadNewestUsers();
+    loadFeaturedPlaces();
+    authReady = true;
+    route();
+});
+
+function setMode(mode) {
+    authMode = mode;
+    document.getElementById('authMsg').innerText = "";
+    document.getElementById('emailRow').style.display = (mode === 'register') ? 'table-row' : 'none';
+    document.getElementById('btnLogin').style.fontWeight = mode === 'login' ? 'bold' : 'normal';
+    document.getElementById('btnRegister').style.fontWeight = mode === 'register' ? 'bold' : 'normal';
+}
+
+function updateUIForGuest() {
+    document.getElementById('profile-box').style.display = 'none';
+    document.getElementById('loginContainer').style.display = 'block';
+    document.getElementById('auth-area').innerHTML = '<span class="BannerText">Guest</span>';
+}
+
+function updateUIForLoggedIn() {
+    document.getElementById('profile-box').style.display = 'block';
+    document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('p-name').innerText = currentUser.username;
+    document.getElementById('p-bux').innerText = currentUser.bux;
+    document.getElementById('auth-area').innerHTML = '<a href="#/profile?id=' + encodeURIComponent(currentUser.uid) + '" class="BannerText">' + escapeHtml(currentUser.username) + '</a>';
+}
+
+function signInWithGoogle() {
+    const msg = document.getElementById('authMsg');
+    msg.innerText = "Opening Google...";
+    msg.className = "status-msg";
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            console.log("[google] signed in:", result.user.uid);
+            msg.innerText = "";
+        })
+        .catch((err) => {
+            console.error("[google auth]", err);
+            let errMsg = err.message;
+            if (err.code === 'auth/popup-closed-by-user') errMsg = "Окно закрыто";
+            if (err.code === 'auth/popup-blocked') errMsg = "Браузер блокирует попапы. Разреши всплывающие окна.";
+            if (err.code === 'auth/operation-not-allowed') errMsg = "Google не включён в Firebase Console!";
+            if (err.code === 'auth/account-exists-with-different-credential') errMsg = "Этот email уже зарегистрирован. Войди паролем.";
+            if (err.code === 'auth/unauthorized-domain') errMsg = "Домен не разрешён в Firebase Console!";
+            msg.innerText = errMsg;
+            msg.className = "status-msg";
+        });
+}
+
+async function handleAuth(e) {
+    e.preventDefault();
+    let usernameInput = document.getElementById('authUser').value.trim();
+    const pass = document.getElementById('authPass').value;
+    const msg = document.getElementById('authMsg');
+
+    if (!usernameInput || !pass) return;
+    if (!isValidUsername(usernameInput)) {
+        msg.innerText = "Username: 3-20 символов, только буквы, цифры, _";
+        msg.className = "status-msg";
+        return;
+    }
+    if (pass.length < 6) {
+        msg.innerText = "Пароль минимум 6 символов";
+        msg.className = "status-msg";
+        return;
+    }
+
+    msg.innerText = "Processing...";
+    msg.className = "status-msg";
+
+    try {
+        if (authMode === 'register') {
+            const email = document.getElementById('authEmail').value.trim();
+            if (!email || !email.includes('@')) {
+                msg.innerText = "Введи корректный email";
+                msg.className = "status-msg";
+                return;
+            }
+
+            if (await isUsernameTaken(usernameInput)) {
+                msg.innerText = "Этот username уже занят";
+                msg.className = "status-msg";
+                return;
+            }
+
+            // профиль создаст onAuthStateChanged (используя pendingRegister)
+            pendingRegister = { username: usernameInput };
+            console.log("[register] creating user...");
+            const cred = await auth.createUserWithEmailAndPassword(email, pass);
+            console.log("[register] created:", cred.user.uid);
+
+            msg.innerText = "Registered! You can play now.";
+            msg.className = "success-msg";
+        } else {
+            const allSnap = await db.ref('public_users').once('value');
+            let foundUid = null;
+            allSnap.forEach(child => {
+                const u = child.val();
+                if (u && u.username && u.username.toLowerCase() === usernameInput.toLowerCase()) {
+                    foundUid = child.key;
+                }
+            });
+            if (!foundUid) {
+                msg.innerText = "Пользователь не найден";
+                msg.className = "status-msg";
+                return;
+            }
+            const userSnap = await db.ref(`users/${foundUid}/email`).once('value');
+            const email = userSnap.val();
+            if (!email) {
+                msg.innerText = "Email не найден. Зарегистрируйся заново.";
+                msg.className = "status-msg";
+                return;
+            }
+            await auth.signInWithEmailAndPassword(email, pass);
+            msg.innerText = "";
+        }
+    } catch (err) {
+        console.error("[auth error]", err);
+        pendingRegister = null;
+        let errMsg = err.message;
+        if (err.code === 'auth/email-already-in-use') errMsg = "Email уже используется";
+        if (err.code === 'auth/user-not-found') errMsg = "Пользователь не найден";
+        if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') errMsg = "Неверный пароль";
+        if (err.code === 'auth/invalid-email') errMsg = "Неверный email";
+        if (err.code === 'auth/weak-password') errMsg = "Слабый пароль";
+        if (err.code === 'auth/network-request-failed') errMsg = "Ошибка сети. Проверь AdBlock или Firebase Domains!";
+        if (err.code === 'auth/operation-not-allowed') errMsg = "Email/Password не включён в Firebase Console!";
+        if (err.code === 'auth/invalid-api-key') errMsg = "Неверный API-ключ";
+
+        msg.innerText = errMsg;
+        msg.className = "status-msg";
+    }
+}
+
+async function logout() {
+    try { await auth.signOut(); } catch (e) { console.error(e); }
+    location.reload();
+}
+
+async function claimDaily() {
+    const msg = document.getElementById('dailyMsg');
+    msg.innerText = "Скоро будет!";
+    msg.className = "status-msg";
+}
+
+async function loadNewestUsers() {
+    const row = document.getElementById('newestUsersRow');
+    if (!row) return;
+    try {
+        const ref = db.ref('public_users').orderByChild('createdAt').limitToLast(9);
+        const snapshot = await ref.once('value');
+        const users = [];
+        snapshot.forEach(child => users.push({ key: child.key, ...child.val() }));
+        users.reverse();
+
+        let html = '';
+        users.forEach((u, index) => {
+            if (!u.username) return;
+            if (index > 0 && index % 3 === 0) html += '</tr><tr>';
+            const avatarUrl = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.username) + '&background=random';
+            html += '<td align="center">' +
+                '<a href="#/profile?id=' + encodeURIComponent(u.key) + '"><img src="' + avatarUrl + '" class="avatar-img"></a><br>' +
+                '<a href="#/profile?id=' + encodeURIComponent(u.key) + '" class="GridLink">' + escapeHtml(u.username) + '</a>' +
+            '</td>';
+        });
+        row.innerHTML = html
+            ? '<table cellspacing="10"><tr>' + html + '</tr></table>'
+            : 'No users yet.';
+    } catch (err) {
+        console.error(err);
+        row.innerHTML = '<span style="color:red">Error loading users</span>';
+    }
+}
+
+// Загрузка карт: сначала из Firebase, если пусто — из папки games/
+async function loadFeaturedPlaces() {
+    const container = document.getElementById('places-list');
+
+    const defaultPlaces = [
+        { id: 'brickbattle-glass-houses', name: 'BrickBattle: Glass Houses', icon: '🧱', visits: 0, file: 'games/20.rbxl' },
+        { id: 'happy-home-dynabloxia', name: 'Happy Home at Dynabloxia', icon: '🏠', visits: 0, file: 'games/template.rbxl' },
+        { id: 'sword-fights-heights', name: 'Sword Fights on the Heights', icon: '⚔️', visits: 0, file: 'games/22.rbxl' }
+    ];
+
+    let places = [];
+
+    try {
+        const snap = await Promise.race([
+            db.ref('places').once('value'),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 6000))
+        ]);
+        snap.forEach(child => places.push({ id: child.key, ...child.val() }));
+    } catch (err) {
+        console.warn('[places] Firebase недоступен:', err);
+    }
+
+    // Если в Firebase пусто — пробуем манифест games/games.json
+    if (places.length === 0) {
+        try {
+            const r = await fetch('games/games.json', { cache: 'no-cache' });
+            if (r.ok) {
+                const list = await r.json();
+                if (Array.isArray(list)) places = list.filter(g => g && g.id && g.name);
+            }
+        } catch (err) {
+            console.warn('[places] games/games.json не найден:', err);
+        }
+    }
+
+    if (places.length === 0) {
+        places = defaultPlaces;
+    }
+
+    let html = '';
+    places.forEach(place => {
+        html += '<div class="place-card" data-id="' + escapeHtml(place.id) + '" data-file="' + escapeHtml(place.file || '') + '">' +
+            '<div class="place-thumb">' +
+                '<img src="' + escapeHtml(place.image || ('images/' + place.id + '.png')) + '" alt="" style="width:100%;height:100%;object-fit:cover;" ' +
+                'onerror="this.remove(); " >' +
+                '<span style="position:absolute;z-index:0;">' + escapeHtml(place.icon || '🎮') + '</span>' +
+            '</div>' +
+            '<div class="place-name">' + escapeHtml(place.name) + '</div>' +
+            '<div class="place-stats">Visits: ' + (Number(place.visits) || 0) + '</div>' +
+        '</div>';
+    });
+
+    container.innerHTML = html;
+    container.querySelectorAll('.place-card').forEach(card => {
+        card.addEventListener('click', () => {
+            openPlace(card.dataset.id, card.dataset.file);
+        });
+    });
+}
+
+setMode('login');
+</script>
+
+</body>
+</html>
